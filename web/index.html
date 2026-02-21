@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Content API - Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] },
+                    colors: {
+                        dark: { 50: '#f8fafc', 100: '#f1f5f9', 700: '#1e293b', 800: '#0f172a', 900: '#020617', 950: '#010312' },
+                        accent: { 400: '#a78bfa', 500: '#8b5cf6', 600: '#7c3aed' },
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { background: #020617; color: #e2e8f0; font-family: 'Inter', system-ui, sans-serif; }
+        .glass { background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(12px); border: 1px solid rgba(148, 163, 184, 0.1); }
+        .glass-hover:hover { border-color: rgba(139, 92, 246, 0.3); }
+        .glow { box-shadow: 0 0 20px rgba(139, 92, 246, 0.15); }
+        .gradient-text { background: linear-gradient(135deg, #a78bfa 0%, #8b5cf6 50%, #7c3aed 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .typing-cursor::after { content: '|'; animation: blink 1s infinite; }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        .fade-in { animation: fadeIn 0.3s ease-out; }
+        .provider-btn.active { border-color: #8b5cf6; background: rgba(139, 92, 246, 0.15); }
+        .provider-btn.unavailable { opacity: 0.4; pointer-events: none; }
+        pre { white-space: pre-wrap; word-wrap: break-word; }
+        .output-area { min-height: 200px; max-height: 500px; overflow-y: auto; }
+        select, input, textarea { background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(148, 163, 184, 0.2); color: #e2e8f0; }
+        select:focus, input:focus, textarea:focus { border-color: #8b5cf6; outline: none; box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.2); }
+        ::-webkit-scrollbar { width: 6px; } ::-webkit-scrollbar-track { background: transparent; } ::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
+    </style>
+</head>
+<body class="min-h-screen">
+    <!-- Header -->
+    <header class="glass sticky top-0 z-50 border-b border-slate-800/50">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm">AI</div>
+                <h1 class="text-lg font-semibold">AI Content <span class="gradient-text">API</span></h1>
+                <span class="text-xs px-2 py-0.5 rounded-full bg-violet-500/20 text-violet-300">v1.0</span>
+            </div>
+            <div class="flex items-center gap-3">
+                <div class="flex items-center gap-2">
+                    <input type="text" id="apiKeyInput" placeholder="Paste your API key..." class="text-sm px-3 py-1.5 rounded-lg w-64">
+                    <button onclick="setApiKey()" class="text-sm px-3 py-1.5 rounded-lg bg-violet-600 hover:bg-violet-500 text-white transition">Set Key</button>
+                </div>
+                <div id="keyStatus" class="text-xs"></div>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 py-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Left: Template + Form -->
+        <div class="lg:col-span-2 space-y-6">
+            <!-- Template Selector -->
+            <div class="glass rounded-xl p-5 glass-hover transition">
+                <h2 class="text-sm font-semibold text-slate-300 uppercase tracking-wider mb-3">Template</h2>
+                <select id="templateSelect" onchange="loadTemplate()" class="w-full rounded-lg px-3 py-2.5 text-sm">
+                    <option value="">Select a template...</option>
+                </select>
+                <p id="templateDesc" class="text-xs text-slate-400 mt-2 hidden"></p>
+            </div>
+
+            <!-- Dynamic Form -->
+            <div id="formContainer" class="glass rounded-xl p-5 glass-hover transition hidden">
+                <h2 class="text-sm font-semibold text-slate-300 uppercase tracking-wider mb-3">Input</h2>
+                <div id="dynamicFields" class="space-y-4"></div>
+
+                <!-- Provider + Options -->
+                <div class="mt-5 pt-4 border-t border-slate-700/50">
+                    <div class="flex flex-wrap items-center gap-3">
+                        <span class="text-xs text-slate-400">Provider:</span>
+                        <div id="providerButtons" class="flex gap-2"></div>
+                        <div class="ml-auto flex items-center gap-3">
+                            <label class="flex items-center gap-1.5 text-xs text-slate-400">
+                                <input type="checkbox" id="streamToggle" checked class="rounded accent-violet-500"> Stream
+                            </label>
+                            <select id="exportFormat" class="text-xs rounded-lg px-2 py-1">
+                                <option value="markdown">Markdown</option>
+                                <option value="plain">Plain Text</option>
+                                <option value="json">JSON</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Generate Button -->
+                <button id="generateBtn" onclick="generate()" class="mt-5 w-full py-3 rounded-xl bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-500 hover:to-purple-500 text-white font-medium transition disabled:opacity-50 disabled:cursor-not-allowed">
+                    Generate Content
+                </button>
+            </div>
+
+            <!-- Output -->
+            <div id="outputContainer" class="glass rounded-xl p-5 glow hidden">
+                <div class="flex items-center justify-between mb-3">
+                    <h2 class="text-sm font-semibold text-slate-300 uppercase tracking-wider">Output</h2>
+                    <div class="flex gap-2">
+                        <button onclick="copyOutput()" class="text-xs px-3 py-1 rounded-lg bg-slate-700 hover:bg-slate-600 text-slate-300 transition">Copy</button>
+                        <button onclick="downloadOutput('md')" class="text-xs px-3 py-1 rounded-lg bg-slate-700 hover:bg-slate-600 text-slate-300 transition">.md</button>
+                        <button onclick="downloadOutput('txt')" class="text-xs px-3 py-1 rounded-lg bg-slate-700 hover:bg-slate-600 text-slate-300 transition">.txt</button>
+                    </div>
+                </div>
+                <div id="outputMeta" class="flex gap-4 text-xs text-slate-400 mb-3"></div>
+                <div id="outputArea" class="output-area p-4 rounded-lg bg-slate-900/50 text-sm leading-relaxed font-mono"></div>
+            </div>
+        </div>
+
+        <!-- Right: Stats + Key Management -->
+        <div class="space-y-6">
+            <!-- Quick Actions -->
+            <div class="glass rounded-xl p-5 glass-hover transition">
+                <h2 class="text-sm font-semibold text-slate-300 uppercase tracking-wider mb-3">Quick Start</h2>
+                <div class="space-y-2">
+                    <button onclick="createKey()" class="w-full text-left text-sm px-3 py-2 rounded-lg bg-violet-600/20 hover:bg-violet-600/30 text-violet-300 transition">+ Create New API Key</button>
+                    <a href="/docs" target="_blank" class="block text-sm px-3 py-2 rounded-lg bg-slate-700/50 hover:bg-slate-700 text-slate-300 transition">API Documentation (Swagger)</a>
+                </div>
+            </div>
+
+            <!-- Usage Stats -->
+            <div id="statsPanel" class="glass rounded-xl p-5 glass-hover transition hidden">
+                <h2 class="text-sm font-semibold text-slate-300 uppercase tracking-wider mb-3">Usage</h2>
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="p-3 rounded-lg bg-slate-800/50">
+                        <div id="statTodayReq" class="text-2xl font-bold gradient-text">0</div>
+                        <div class="text-xs text-slate-400">Requests today</div>
+                    </div>
+                    <div class="p-3 rounded-lg bg-slate-800/50">
+                        <div id="statTodayTokens" class="text-2xl font-bold gradient-text">0</div>
+                        <div class="text-xs text-slate-400">Tokens today</div>
+                    </div>
+                    <div class="p-3 rounded-lg bg-slate-800/50">
+                        <div id="statTotalReq" class="text-2xl font-bold text-slate-300">0</div>
+                        <div class="text-xs text-slate-400">Total requests</div>
+                    </div>
+                    <div class="p-3 rounded-lg bg-slate-800/50">
+                        <div id="statTotalTokens" class="text-2xl font-bold text-slate-300">0</div>
+                        <div class="text-xs text-slate-400">Total tokens</div>
+                    </div>
+                </div>
+                <div id="statLimit" class="mt-3 text-xs text-slate-400"></div>
+            </div>
+
+            <!-- Providers Status -->
+            <div class="glass rounded-xl p-5 glass-hover transition">
+                <h2 class="text-sm font-semibold text-slate-300 uppercase tracking-wider mb-3">Providers</h2>
+                <div id="providerStatus" class="space-y-2"></div>
+            </div>
+
+            <!-- API Keys List -->
+            <div class="glass rounded-xl p-5 glass-hover transition">
+                <h2 class="text-sm font-semibold text-slate-300 uppercase tracking-wider mb-3">API Keys</h2>
+                <div id="keysList" class="space-y-2 text-sm">
+                    <p class="text-xs text-slate-500">No keys yet. Create one above.</p>
+                </div>
+            </div>
+
+            <!-- History -->
+            <div id="historyPanel" class="glass rounded-xl p-5 glass-hover transition hidden">
+                <h2 class="text-sm font-semibold text-slate-300 uppercase tracking-wider mb-3">Recent</h2>
+                <div id="historyList" class="space-y-2 text-xs"></div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Create Key Modal -->
+    <div id="keyModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center">
+        <div class="glass rounded-2xl p-6 w-full max-w-md mx-4 fade-in">
+            <h3 class="text-lg font-semibold mb-4">Create API Key</h3>
+            <div class="space-y-3">
+                <input type="text" id="keyName" placeholder="Key name (e.g., my-app)" class="w-full rounded-lg px-3 py-2 text-sm">
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="text-xs text-slate-400">Rate limit (req/min)</label>
+                        <input type="number" id="keyRateLimit" value="60" class="w-full rounded-lg px-3 py-2 text-sm">
+                    </div>
+                    <div>
+                        <label class="text-xs text-slate-400">Daily limit</label>
+                        <input type="number" id="keyDailyLimit" value="1000" class="w-full rounded-lg px-3 py-2 text-sm">
+                    </div>
+                </div>
+            </div>
+            <div class="flex gap-3 mt-5">
+                <button onclick="closeKeyModal()" class="flex-1 py-2 rounded-lg bg-slate-700 hover:bg-slate-600 text-sm transition">Cancel</button>
+                <button onclick="submitCreateKey()" class="flex-1 py-2 rounded-lg bg-violet-600 hover:bg-violet-500 text-white text-sm transition">Create</button>
+            </div>
+            <div id="keyResult" class="mt-4 hidden">
+                <p class="text-xs text-slate-400 mb-1">Your new API key (copy it now, it won't be shown again):</p>
+                <code id="keyResultValue" class="block p-3 rounded-lg bg-slate-900 text-green-400 text-sm break-all cursor-pointer" onclick="navigator.clipboard.writeText(this.textContent)"></code>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    // ── State ──
+    let apiKey = localStorage.getItem('ai_content_api_key') || '';
+    let selectedProvider = null;
+    let currentOutput = '';
+    let templates = [];
+    let providers = [];
+
+    // ── Init ──
+    document.addEventListener('DOMContentLoaded', async () => {
+        if (apiKey) {
+            document.getElementById('apiKeyInput').value = apiKey;
+            updateKeyStatus(true);
+        }
+        await Promise.all([loadTemplates(), loadProviders(), loadKeys()]);
+        if (apiKey) loadStats();
+    });
+
+    // ── API Key ──
+    function setApiKey() {
+        apiKey = document.getElementById('apiKeyInput').value.trim();
+        if (apiKey) {
+            localStorage.setItem('ai_content_api_key', apiKey);
+            updateKeyStatus(true);
+            loadStats();
+        }
+    }
+
+    function updateKeyStatus(active) {
+        const el = document.getElementById('keyStatus');
+        el.innerHTML = active
+            ? '<span class="text-green-400">&#x2022; Connected</span>'
+            : '<span class="text-red-400">&#x2022; No key</span>';
+    }
+
+    // ── Templates ──
+    async function loadTemplates() {
+        try {
+            const res = await fetch('/api/templates');
+            const data = await res.json();
+            templates = data.templates;
+            const select = document.getElementById('templateSelect');
+            const categories = {};
+            templates.forEach(t => {
+                if (!categories[t.category]) categories[t.category] = [];
+                categories[t.category].push(t);
+            });
+            Object.entries(categories).forEach(([cat, items]) => {
+                const group = document.createElement('optgroup');
+                group.label = cat.charAt(0).toUpperCase() + cat.slice(1);
+                items.forEach(t => {
+                    const opt = document.createElement('option');
+                    opt.value = t.id;
+                    opt.textContent = t.name;
+                    group.appendChild(opt);
+                });
+                select.appendChild(group);
+            });
+        } catch (e) {
+            console.error('Failed to load templates:', e);
+        }
+    }
+
+    function loadTemplate() {
+        const id = document.getElementById('templateSelect').value;
+        const template = templates.find(t => t.id === id);
+        const form = document.getElementById('formContainer');
+        const desc = document.getElementById('templateDesc');
+
+        if (!template) {
+            form.classList.add('hidden');
+            desc.classList.add('hidden');
+            return;
+        }
+
+        desc.textContent = template.description;
+        desc.classList.remove('hidden');
+        form.classList.remove('hidden');
+
+        const fields = document.getElementById('dynamicFields');
+        fields.innerHTML = '';
+
+        template.fields.forEach(f => {
+            const div = document.createElement('div');
+            const label = document.createElement('label');
+            label.className = 'block text-xs text-slate-400 mb-1';
+            label.textContent = f.label + (f.required ? ' *' : '');
+            div.appendChild(label);
+
+            let input;
+            if (f.type === 'textarea') {
+                input = document.createElement('textarea');
+                input.rows = 3;
+            } else if (f.type === 'select' && f.options) {
+                input = document.createElement('select');
+                f.options.forEach(opt => {
+                    const o = document.createElement('option');
+                    o.value = opt;
+                    o.textContent = opt;
+                    if (opt === f.default) o.selected = true;
+                    input.appendChild(o);
+                });
+            } else {
+                input = document.createElement('input');
+                input.type = f.type === 'number' ? 'number' : 'text';
+            }
+
+            input.className = 'w-full rounded-lg px-3 py-2 text-sm';
+            input.id = `field_${f.name}`;
+            input.name = f.name;
+            if (f.placeholder) input.placeholder = f.placeholder;
+            if (f.default && f.type !== 'select') input.value = f.default;
+            div.appendChild(input);
+            fields.appendChild(div);
+        });
+    }
+
+    // ── Providers ──
+    async function loadProviders() {
+        try {
+            const res = await fetch('/api/providers');
+            const data = await res.json();
+            providers = data.providers;
+            renderProviderButtons();
+            renderProviderStatus();
+        } catch (e) {
+            console.error('Failed to load providers:', e);
+        }
+    }
+
+    function renderProviderButtons() {
+        const container = document.getElementById('providerButtons');
+        container.innerHTML = '';
+        const colors = { openai: '#10b981', gemini: '#3b82f6', ollama: '#f59e0b' };
+        providers.forEach((p, i) => {
+            const btn = document.createElement('button');
+            btn.className = `provider-btn text-xs px-3 py-1.5 rounded-lg border border-slate-600 transition ${!p.available ? 'unavailable' : ''}`;
+            btn.textContent = p.name.charAt(0).toUpperCase() + p.name.slice(1);
+            btn.onclick = () => selectProvider(p.name);
+            if (i === 0 && p.available) {
+                selectedProvider = p.name;
+                btn.classList.add('active');
+            }
+            container.appendChild(btn);
+        });
+        if (!selectedProvider) {
+            const avail = providers.find(p => p.available);
+            if (avail) selectProvider(avail.name);
+        }
+    }
+
+    function selectProvider(name) {
+        selectedProvider = name;
+        document.querySelectorAll('.provider-btn').forEach(btn => {
+            btn.classList.toggle('active', btn.textContent.toLowerCase() === name);
+        });
+    }
+
+    function renderProviderStatus() {
+        const container = document.getElementById('providerStatus');
+        container.innerHTML = '';
+        providers.forEach(p => {
+            const div = document.createElement('div');
+            div.className = 'flex items-center justify-between p-2 rounded-lg bg-slate-800/50';
+            div.innerHTML = `
+                <span class="text-sm">${p.name.charAt(0).toUpperCase() + p.name.slice(1)}</span>
+                <span class="text-xs ${p.available ? 'text-green-400' : 'text-red-400'}">${p.available ? 'Available' : 'Not configured'}</span>
+            `;
+            container.appendChild(div);
+        });
+    }
+
+    // ── Generate ──
+    async function generate() {
+        if (!apiKey) { alert('Set your API key first'); return; }
+        const templateId = document.getElementById('templateSelect').value;
+        if (!templateId) { alert('Select a template first'); return; }
+
+        const template = templates.find(t => t.id === templateId);
+        const variables = {};
+        template.fields.forEach(f => {
+            const el = document.getElementById(`field_${f.name}`);
+            if (el) variables[f.name] = el.value;
+        });
+
+        const stream = document.getElementById('streamToggle').checked;
+        const exportFormat = document.getElementById('exportFormat').value;
+        const btn = document.getElementById('generateBtn');
+        const outputContainer = document.getElementById('outputContainer');
+        const outputArea = document.getElementById('outputArea');
+        const outputMeta = document.getElementById('outputMeta');
+
+        btn.disabled = true;
+        btn.textContent = 'Generating...';
+        outputContainer.classList.remove('hidden');
+        outputArea.innerHTML = '<span class="text-slate-500 typing-cursor">Generating</span>';
+        outputMeta.innerHTML = '';
+        currentOutput = '';
+
+        const body = {
+            template_id: templateId,
+            variables,
+            provider: selectedProvider,
+            stream,
+            export_format: exportFormat,
+        };
+
+        try {
+            if (stream) {
+                const res = await fetch('/api/generate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-API-Key': apiKey },
+                    body: JSON.stringify(body),
+                });
+
+                if (!res.ok) {
+                    const err = await res.json();
+                    throw new Error(err.detail || 'Generation failed');
+                }
+
+                const reader = res.body.getReader();
+                const decoder = new TextDecoder();
+                outputArea.innerHTML = '';
+                let buffer = '';
+
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+                    buffer += decoder.decode(value, { stream: true });
+                    const lines = buffer.split('\n');
+                    buffer = lines.pop();
+                    for (const line of lines) {
+                        if (line.startsWith('data: ')) {
+                            try {
+                                const data = JSON.parse(line.slice(6));
+                                if (data.chunk) {
+                                    currentOutput += data.chunk;
+                                    outputArea.textContent = currentOutput;
+                                    outputArea.scrollTop = outputArea.scrollHeight;
+                                }
+                                if (data.done) {
+                                    outputMeta.innerHTML = `<span>Tokens: ~${data.tokens_used}</span><span>Provider: ${selectedProvider}</span>`;
+                                }
+                                if (data.error) throw new Error(data.error);
+                            } catch (e) { if (e.message !== 'Unexpected end of JSON input') console.error(e); }
+                        }
+                    }
+                }
+            } else {
+                const res = await fetch('/api/generate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-API-Key': apiKey },
+                    body: JSON.stringify(body),
+                });
+
+                if (!res.ok) {
+                    const err = await res.json();
+                    throw new Error(err.detail || 'Generation failed');
+                }
+
+                const data = await res.json();
+                currentOutput = data.content;
+                outputArea.textContent = currentOutput;
+                outputMeta.innerHTML = `<span>Tokens: ${data.tokens_used}</span><span>Provider: ${data.provider}</span><span>Model: ${data.model}</span>`;
+            }
+        } catch (e) {
+            outputArea.innerHTML = `<span class="text-red-400">${e.message}</span>`;
+        } finally {
+            btn.disabled = false;
+            btn.textContent = 'Generate Content';
+            loadStats();
+        }
+    }
+
+    // ── Output Actions ──
+    function copyOutput() {
+        navigator.clipboard.writeText(currentOutput);
+        const btn = event.target;
+        btn.textContent = 'Copied!';
+        setTimeout(() => btn.textContent = 'Copy', 1500);
+    }
+
+    function downloadOutput(ext) {
+        const blob = new Blob([currentOutput], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `generated-content.${ext}`;
+        a.click();
+        URL.revokeObjectURL(url);
+    }
+
+    // ── Stats ──
+    async function loadStats() {
+        if (!apiKey) return;
+        try {
+            const res = await fetch(`/api/keys/${apiKey}/usage`);
+            if (!res.ok) { document.getElementById('statsPanel').classList.add('hidden'); return; }
+            const data = await res.json();
+            document.getElementById('statsPanel').classList.remove('hidden');
+            document.getElementById('statTodayReq').textContent = data.today.requests;
+            document.getElementById('statTodayTokens').textContent = data.today.tokens.toLocaleString();
+            document.getElementById('statTotalReq').textContent = data.total.requests;
+            document.getElementById('statTotalTokens').textContent = data.total.tokens.toLocaleString();
+            document.getElementById('statLimit').textContent = `Limits: ${data.rate_limit} req/min, ${data.daily_limit} req/day`;
+        } catch (e) {}
+    }
+
+    // ── Key Management ──
+    function createKey() {
+        document.getElementById('keyModal').classList.remove('hidden');
+        document.getElementById('keyResult').classList.add('hidden');
+        document.getElementById('keyName').value = '';
+    }
+
+    function closeKeyModal() {
+        document.getElementById('keyModal').classList.add('hidden');
+    }
+
+    async function submitCreateKey() {
+        const name = document.getElementById('keyName').value.trim();
+        if (!name) { alert('Enter a key name'); return; }
+        const rateLimit = document.getElementById('keyRateLimit').value;
+        const dailyLimit = document.getElementById('keyDailyLimit').value;
+
+        try {
+            const res = await fetch(`/api/keys?name=${encodeURIComponent(name)}&rate_limit=${rateLimit}&daily_limit=${dailyLimit}`, { method: 'POST' });
+            const data = await res.json();
+            document.getElementById('keyResult').classList.remove('hidden');
+            document.getElementById('keyResultValue').textContent = data.key;
+
+            // Auto-set as active key
+            apiKey = data.key;
+            localStorage.setItem('ai_content_api_key', apiKey);
+            document.getElementById('apiKeyInput').value = apiKey;
+            updateKeyStatus(true);
+            loadKeys();
+            loadStats();
+        } catch (e) {
+            alert('Failed to create key: ' + e.message);
+        }
+    }
+
+    async function loadKeys() {
+        try {
+            const res = await fetch('/api/keys');
+            const data = await res.json();
+            const container = document.getElementById('keysList');
+            if (!data.keys.length) {
+                container.innerHTML = '<p class="text-xs text-slate-500">No keys yet. Create one above.</p>';
+                return;
+            }
+            container.innerHTML = '';
+            data.keys.forEach(k => {
+                const div = document.createElement('div');
+                div.className = 'flex items-center justify-between p-2 rounded-lg bg-slate-800/50';
+                div.innerHTML = `
+                    <div>
+                        <div class="text-xs font-medium">${k.name}</div>
+                        <div class="text-xs text-slate-500">${k.key_preview}</div>
+                    </div>
+                    <span class="text-xs ${k.is_active ? 'text-green-400' : 'text-red-400'}">${k.is_active ? 'Active' : 'Inactive'}</span>
+                `;
+                container.appendChild(div);
+            });
+        } catch (e) {}
+    }
+    </script>
+</body>
+</html>
